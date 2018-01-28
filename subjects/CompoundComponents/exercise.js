@@ -35,28 +35,44 @@ class RadioGroup extends React.Component {
 
   render() {
     //pass the state to children as props
+    //child has onClick handler that set the selectedIndex state
     const children = React.Children.map(
       this.props.children,
       (child, index) => {
         return React.cloneElement(child, {
-          isSelected: index === this.state.selectedIndex
+          isSelected: index === this.state.selectedIndex,
+          handleClick: () => {
+            this.setState({ selectedIndex: index })
+          }
         })
       }
     )
-    console.log(children)
-    return <div>{children}</div>
+    return (
+      <div>
+        <pre>{JSON.stringify(this.state, null, 2)}</pre>
+
+        {children}
+      </div>
+    )
   }
 }
 
 class RadioOption extends React.Component {
   static propTypes = {
     value: PropTypes.string,
-    isSelected: PropTypes.bool
+    isSelected: PropTypes.bool,
+    handleClick: PropTypes.func
   }
+  //how do i know which index i am?
+  //it is passed from RadioGroup
 
   render() {
     return (
-      <div>
+      <div
+        onClick={() => {
+          this.props.handleClick()
+        }}
+      >
         <RadioIcon isSelected={this.props.isSelected} />{" "}
         {this.props.children}
       </div>
