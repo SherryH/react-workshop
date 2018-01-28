@@ -31,21 +31,34 @@ class RadioGroup extends React.Component {
   static propTypes = {
     defaultValue: PropTypes.string
   }
+  state = { selectedIndex: 0 }
 
   render() {
-    return <div>{this.props.children}</div>
+    //pass the state to children as props
+    const children = React.Children.map(
+      this.props.children,
+      (child, index) => {
+        return React.cloneElement(child, {
+          isSelected: index === this.state.selectedIndex
+        })
+      }
+    )
+    console.log(children)
+    return <div>{children}</div>
   }
 }
 
 class RadioOption extends React.Component {
   static propTypes = {
-    value: PropTypes.string
+    value: PropTypes.string,
+    isSelected: PropTypes.bool
   }
 
   render() {
     return (
       <div>
-        <RadioIcon isSelected={false} /> {this.props.children}
+        <RadioIcon isSelected={this.props.isSelected} />{" "}
+        {this.props.children}
       </div>
     )
   }
