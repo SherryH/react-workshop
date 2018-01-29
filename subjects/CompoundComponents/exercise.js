@@ -27,6 +27,11 @@ import React from "react"
 import ReactDOM from "react-dom"
 import PropTypes from "prop-types"
 
+const ENTER_KEY = 13
+const SPACE_KEY = 32
+const ARROW_RIGHT = 39
+const ARROW_LEFT = 37
+
 class RadioGroup extends React.Component {
   static propTypes = {
     defaultValue: PropTypes.string
@@ -43,17 +48,38 @@ class RadioGroup extends React.Component {
           isSelected: index === this.state.selectedIndex,
           handleClick: () => {
             this.setState({ selectedIndex: index })
+          },
+          handleKeyDown: event => {
+            const KeyDownFuncMap = {
+              13: () => this.setState({ selectedIndex: index }),
+              32: () => this.setState({ selectedIndex: index }),
+              39: () => {
+                if (this.state.selectedIndex < 3) {
+                  this.setState(prevState => {
+                    return {
+                      selectedIndex: prevState.selectedIndex + 1
+                    }
+                  })
+                }
+              },
+              37: () => {
+                if (this.state.selectedIndex > 0) {
+                  this.setState(prevState => {
+                    return {
+                      selectedIndex: prevState.selectedIndex - 1
+                    }
+                  })
+                }
+              }
+            }
+            if (KeyDownFuncMap[event.keyCode]) {
+              KeyDownFuncMap[event.keyCode]()
+            }
           }
         })
       }
     )
-    return (
-      <div>
-        <pre>{JSON.stringify(this.state, null, 2)}</pre>
-
-        {children}
-      </div>
-    )
+    return <div>{children}</div>
   }
 }
 
@@ -61,7 +87,8 @@ class RadioOption extends React.Component {
   static propTypes = {
     value: PropTypes.string,
     isSelected: PropTypes.bool,
-    handleClick: PropTypes.func
+    handleClick: PropTypes.func,
+    handleKeyDown: PropTypes.func
   }
   //how do i know which index i am?
   //it is passed from RadioGroup
@@ -69,9 +96,11 @@ class RadioOption extends React.Component {
   render() {
     return (
       <div
+        tabIndex="0"
         onClick={() => {
           this.props.handleClick()
         }}
+        onKeyDown={this.props.handleKeyDown}
       >
         <RadioIcon isSelected={this.props.isSelected} />{" "}
         {this.props.children}
