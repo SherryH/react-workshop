@@ -19,6 +19,8 @@ import React from "react"
 import ReactDOM from "react-dom"
 import PropTypes from "prop-types"
 
+const ENTER_KEY = 13
+
 class Form extends React.Component {
   static childContextTypes = {
     handleSubmit: PropTypes.func,
@@ -28,7 +30,6 @@ class Form extends React.Component {
     values: {}
   }
   getChildContext() {
-    console.log("onSubmit", this.props.onSubmit)
     return {
       handleSubmit: this.props.onSubmit,
       handleInputChange: args => {
@@ -58,7 +59,13 @@ class SubmitButton extends React.Component {
 
 class TextInput extends React.Component {
   static contextTypes = {
-    handleInputChange: PropTypes.func
+    handleInputChange: PropTypes.func,
+    handleSubmit: PropTypes.func
+  }
+  handleKeyDown = event => {
+    if (event.keyCode === ENTER_KEY) {
+      this.context.handleSubmit()
+    }
   }
   render() {
     return (
@@ -69,6 +76,7 @@ class TextInput extends React.Component {
             value: event.target.value
           })
         }
+        onKeyDown={this.handleKeyDown}
         type="text"
         name={this.props.name}
         placeholder={this.props.placeholder}
