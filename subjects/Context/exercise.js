@@ -27,13 +27,30 @@ class Form extends React.Component {
     handleInputChange: PropTypes.func
   }
   state = {
-    values: {}
+    values: []
   }
   getChildContext() {
+    const { values } = this.state
     return {
-      handleSubmit: this.props.onSubmit,
+      handleSubmit: values => {
+        this.props.onSubmit(this.state.values)
+      },
       handleInputChange: args => {
-        console.log("name value", args)
+        const [name] = Object.keys(args)
+        const [value] = Object.values(args)
+        console.log(name, value)
+        this.setState(
+          prevState => {
+            // nested object, better to use merge
+            const newState = { ...prevState }
+            console.log(prevState, newState)
+            newState.values[name] = value
+            return { values: newState.values }
+          },
+          () => {
+            console.log("state value", this.state.values)
+          }
+        )
       }
     }
   }
@@ -72,8 +89,7 @@ class TextInput extends React.Component {
       <input
         onChange={event =>
           this.context.handleInputChange({
-            name: this.props.name,
-            value: event.target.value
+            [this.props.name]: event.target.value
           })
         }
         onKeyDown={this.handleKeyDown}
@@ -86,8 +102,9 @@ class TextInput extends React.Component {
 }
 
 class App extends React.Component {
-  handleSubmit = () => {
-    alert("YOU WIN!")
+  handleSubmit = args => {
+    console.log(args)
+    alert("YOU WIN!", args)
   }
 
   render() {
