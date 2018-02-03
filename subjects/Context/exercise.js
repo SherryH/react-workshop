@@ -24,7 +24,9 @@ const ENTER_KEY = 13
 class Form extends React.Component {
   static childContextTypes = {
     handleSubmit: PropTypes.func,
-    handleInputChange: PropTypes.func
+    handleInputChange: PropTypes.func,
+    handleReset: PropTypes.func,
+    values: PropTypes.array
   }
   state = {
     values: []
@@ -38,20 +40,35 @@ class Form extends React.Component {
       handleInputChange: args => {
         const [name] = Object.keys(args)
         const [value] = Object.values(args)
-        console.log(name, value)
         this.setState(
           prevState => {
-            // nested object, better to use merge
+            // nested object, better to use lodash merge
             const newState = { ...prevState }
-            console.log(prevState, newState)
             newState.values[name] = value
             return { values: newState.values }
           },
           () => {
-            console.log("state value", this.state.values)
+            console.log(this.state.values)
           }
         )
-      }
+      },
+      handleReset: () => {
+        console.log("form reset")
+        this.setState(
+          prevState => {
+            const newState = { ...prevState }
+            for (var props in newState.values) {
+              newState.values[props] = ""
+            }
+            return { values: newState.values }
+          },
+          () => {
+            console.log("after form submission", this.state.values)
+          }
+        )
+        this.props.onReset()
+      },
+      values: this.state.values
     }
   }
 
@@ -74,10 +91,24 @@ class SubmitButton extends React.Component {
   }
 }
 
+class ResetButton extends React.Component {
+  static contextTypes = {
+    handleReset: PropTypes.func
+  }
+  render() {
+    return (
+      <button onClick={this.context.handleReset}>
+        {this.props.children}
+      </button>
+    )
+  }
+}
+
 class TextInput extends React.Component {
   static contextTypes = {
     handleInputChange: PropTypes.func,
-    handleSubmit: PropTypes.func
+    handleSubmit: PropTypes.func,
+    values: PropTypes.array
   }
   handleKeyDown = event => {
     if (event.keyCode === ENTER_KEY) {
@@ -92,6 +123,7 @@ class TextInput extends React.Component {
             [this.props.name]: event.target.value
           })
         }
+        value={this.context.values[this.props.name]}
         onKeyDown={this.handleKeyDown}
         type="text"
         name={this.props.name}
@@ -103,8 +135,11 @@ class TextInput extends React.Component {
 
 class App extends React.Component {
   handleSubmit = args => {
-    console.log(args)
+    console.log("form values", args)
     alert("YOU WIN!", args)
+  }
+  handleReset = () => {
+    console.log("reset")
   }
 
   render() {
@@ -114,13 +149,14 @@ class App extends React.Component {
           This isn't even my final <code>&lt;Form/&gt;</code>!
         </h1>
 
-        <Form onSubmit={this.handleSubmit}>
+        <Form onSubmit={this.handleSubmit} onReset={this.handleReset}>
           <p>
             <TextInput name="firstName" placeholder="First Name" />{" "}
             <TextInput name="lastName" placeholder="Last Name" />
           </p>
           <p>
             <SubmitButton>Submit</SubmitButton>
+            <ResetButton>Reset</ResetButton>
           </p>
         </Form>
       </div>
