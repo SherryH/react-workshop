@@ -15,11 +15,22 @@
 //   without using DOM traversal APIs
 // - Implement a <ResetButton> that resets the <TextInput>s in the form
 ////////////////////////////////////////////////////////////////////////////////
+
+// First go works, 2 improvments
+// 1. Input and Form should handle defaultValue
+// 2. Add 'form' namespace to contextTypes
+
+///////////////////////////////
 import React from "react"
 import ReactDOM from "react-dom"
 import PropTypes from "prop-types"
 
 const ENTER_KEY = 13
+
+// we dont want to save the state of valeus in the App level
+// so we save them to Form on any children (Input) change
+// so Form always have a copy of all values
+// and Form can pass that information onSubmit
 
 class Form extends React.Component {
   static childContextTypes = {
@@ -31,6 +42,8 @@ class Form extends React.Component {
   state = {
     values: []
   }
+
+  // pass these methods down to children and grandchildren...
   getChildContext() {
     const { values } = this.state
     return {
@@ -110,6 +123,9 @@ class TextInput extends React.Component {
     handleSubmit: PropTypes.func,
     values: PropTypes.array
   }
+  // we need to pass the defaultValues set back to the form
+  // by default, defaultValues = ''
+  // The form should save the defaultValues in its object or state
   handleKeyDown = event => {
     if (event.keyCode === ENTER_KEY) {
       this.context.handleSubmit()
@@ -135,7 +151,7 @@ class TextInput extends React.Component {
 
 class App extends React.Component {
   handleSubmit = args => {
-    console.log("form values", args)
+    console.log("form values: [firstName: 'f', lastName: 'l']", args)
     alert("YOU WIN!", args)
   }
   handleReset = () => {
